@@ -1,9 +1,15 @@
 #!/usr/bin/env python
  
-import sys
-import signal
-from scapy.all import *
-import netaddr
+try:
+	import sys
+	import signal
+	from scapy.all import *
+	import netaddr
+except:
+	print "\nMissing Libraries"
+	print "Check that the following libraries are available"
+	print "\tsys\n\tsignal\n\tscapy\n\tnetaddr"
+	sys.exit(1)
  
 def signal_handler(signal, frame):
 	print('=================')
