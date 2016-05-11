@@ -1,14 +1,12 @@
 #!/usr/bin/env python
  
-try:
-	import sys
-	import signal
+import sys
+import signal
+try:	
 	from scapy.all import *
 except:
-	print "\nMissing Libraries"
-	print "Check that the following libraries are available"
-	print "\tsys\n\tsignal\n\tscapy"
-	sys.exit(1)
+	print "\n[*] ERROR: Missing Scapy library\n"
+	sys.exit(1)	
  
 def signal_handler(signal, frame):
 	print('=================')
@@ -19,7 +17,8 @@ def signal_handler(signal, frame):
 
 def usage():
 	if len(sys.argv) != 3:
-		print "\n\tUsage: python arp-mon.py -i <Interface>\n"
+		print "\nUsage: "
+		print "\tpython arp-mon.py -i <Interface>\n"
 		sys.exit(1)
 
 def monitor (packet):
@@ -39,6 +38,8 @@ if __name__ == "__main__":
 	check_root()
 	parameters ={sys.argv[1]:sys.argv[2]}
 	try:
+		print "\n[*] Sniffing for ARP Requests and Responses"
+		print "\nPacket details"
 		sniff(iface=parameters["-i"], filter="arp", prn=monitor)
 	except:
 		print "Unknown parameters"
