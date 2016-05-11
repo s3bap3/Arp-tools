@@ -1,37 +1,38 @@
 #!/usr/bin/env python
  
+import sys
+import signal
 try:
-	import sys
-	import signal
-	from scapy.all import *
 	import netaddr
 except:
-	print "\nMissing Libraries"
-	print "Check that the following libraries are available"
-	print "\tsys\n\tsignal\n\tscapy\n\tnetaddr"
+	print "\n[*] ERROR: Missing Netaddr library\n"
+	sys.exit(1)
+try:	
+	from scapy.all import *
+except:
+	print "\n[*] ERROR: Missing Scapy library\n"
 	sys.exit(1)
  
 def signal_handler(signal, frame):
-	print('=================')
+	print('\n=================')
 	print('Execution aborted')
 	print('=================')
 	os.system("kill -9 " + str(os.getpid()))
 	sys.exit(1)
 
+def signal_exit(signal, frame):
+	sys.exit(1)
+
 def usage():
 	if len(sys.argv) < 3:
-		print "\n\tUsage:  python arp-scan.py -i <IP>"
-		print "\t\tpython arp-scan.py -n <IP network/netmask>"
-		print "\t\tpython arp-scan.py -l <Ips list>"
-		print "\t\tpython arp-scan.py -f <File>\n"
+		print "\nUsage:"
+		print "\tpython arp-scan.py -l <IPs>"
+		print "\t<ips> is a single ip, range , or list of IPs (separated by \",\")\n"
 		sys.exit(1)
  
 def decode_netmask (network):
-	try:
-		for ip in netaddr.IPNetwork(network):
-			scan(str(ip))
-	except:
-		print "Missing netaddr library"
+	for ip in netaddr.IPNetwork(network):
+		scan(str(ip))
 
 def decode_file (filename):
 	ipsfile = open (filename,"r")
@@ -42,13 +43,10 @@ def decode_enumeration (iplist):
 	for line in iplist:
 		scan(line)
 
-def scan (ip):
-	try:
-		ans,unans=srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ip,hwdst="ff:ff:ff:ff:ff:ff"), timeout=2, verbose=0)
-		for pair in ans:
-			print pair[1].psrc + "\t\t" + pair[1].hwsrc
-	except:
-		print "Missing scapy library"
+def scan_devices(ip):
+	ans,unans=srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ip,hwdst="ff:ff:ff:ff:ff:ff"), timeout=2, verbose=0)
+	for pair in ans:
+		print "%-20s%s" %(pair[1].psrc, pair[1].hwsrc)
 
 def check_root():
     if not os.geteuid() == 0:
@@ -60,14 +58,17 @@ if __name__ == "__main__":
 	usage()
 	check_root()
 	parameters ={sys.argv[1]:sys.argv[2]}
-	if sys.argv[1] == "-n":
-		decode_netmask(parameters["-n"])
-	elif sys.argv[1] == "-i":
-		scan(parameters["-i"])
-	elif sys.argv[1] == "-f":
-		decode_file(parameters["-f"])
-	elif sys.argv[1] == "-l":
-		decode_enumeration(sys.argv[2:])
+	print "\n[*] Scanning for active IPs"
+	if "/" in parameters["-l"]:
+		print "[*] Scanning subnet %s" %(parameters["-l"])
+		print "\n%-20s%s" %("IP", "MAC")
+		decode_netmask(parameters["-l"])
+	elif "," in parameters["-l"]:
+		print "[*] Scanning list of IPs %s" %(parameters["-l"])
+		print "\n%-20s%s" %("IP", "MAC")
+		decode_enumeration(parameters["-l"])
 	else:
-		print "Unknown parameters"
-		sys.exit(1)
+		print "[*] Scanning Single IP %s" %(parameters["-l"])
+		print "\n%-20s%s" %("IP", "MAC")
+		scan_devices(parameters["-l"])
+	print ""
