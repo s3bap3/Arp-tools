@@ -32,16 +32,16 @@ def usage():
  
 def decode_netmask (network):
 	for ip in netaddr.IPNetwork(network):
-		scan(str(ip))
+		scan_devices(str(ip))
 
 def decode_file (filename):
 	ipsfile = open (filename,"r")
 	for line in ipsfile:
-		scan(line)
+		scan_devices(line)
 
 def decode_enumeration (iplist):
 	for line in iplist:
-		scan(line)
+		scan_devices(line)
 
 def scan_devices(ip):
 	ans,unans=srp(Ether(dst="ff:ff:ff:ff:ff:ff")/ARP(pdst=ip,hwdst="ff:ff:ff:ff:ff:ff"), timeout=2, verbose=0)
