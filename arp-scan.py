@@ -1,17 +1,25 @@
 #!/usr/bin/env python
+
+def missing_library(string):
+	print "\nMissing %s Library\n" %(string)
+	sys.exit(1)
  
-import sys
-import signal
+try:
+	import sys
+except: 
+	missing_library("sys")
+try:
+	import signal
+except: 
+	missing_library("signal")
+try:
+	from scapy.all import *
+except: 
+	missing_library("scapy")
 try:
 	import netaddr
-except:
-	print "\n[*] ERROR: Missing Netaddr library\n"
-	sys.exit(1)
-try:	
-	from scapy.all import *
-except:
-	print "\n[*] ERROR: Missing Scapy library\n"
-	sys.exit(1)
+except: 
+	missing_library("netaddr")
  
 def signal_handler(signal, frame):
 	print('\n=================')
